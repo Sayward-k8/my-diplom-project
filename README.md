@@ -1183,35 +1183,25 @@ load_balancer_ip = "81.26.179.68"
 
 # Проверка мониторинга Zabbix
 
-Доступность Zabbix
-
-![alt text](скрин сайта)
-
 ## Хосты в Zabbix
 
-![alt text](скрин сайта)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/zabbix_host.png)
 
-## Dashboard с метриками
+## Dashboard с метриками web серверов
 
-![alt text](скрин сайта)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/zabbix_web1.png)
 
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/zabbix_web2.png)
 
 ## Проверка логов
 
-Веб-интерфейс Kibana доступен по адресу:
+Веб-интерфейс Kibana доступен по адресу: http://111.88.250.37:5601/
 
-![alt text](скрин сайта)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/kibana.png)
 
-Для просмотра логов nginx был создан index pattern `filebeat-*`
+Для просмотра логов nginx был создан index pattern `filebeat-*` , отображаются все HTTP запросы к веб-серверам и ошибки nginx
 
-![alt text](скрин сайта)
-
-В разделе **Discover** отображаются логи nginx:
-
-- `access.log` — все HTTP запросы к веб-серверам
-- `error.log` — ошибки nginx
-
-![alt text](скрин сайта)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/filebeat.png)
 
 # Резервное копирование (Snapshots) 
 ```hcl 
