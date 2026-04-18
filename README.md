@@ -81,6 +81,29 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 Здравствуйте. 
 Задание было использовать terraform и ansible и так как в ходе выполнения задания приходилось многократно удалять и заново деплоить все ресурсы на YC, хотелось в этой работе добиться максимальной автоматизации, но не всё получилось и хосты в zabbix добавлял руками ☺
 
+У меня изменились ip адреса после [Финальный штрих](#Финал), так надо было перезапустить машины...поэтому правильный Outputs: 
+
+```
+Outputs:
+
+bastion_public_ip = "93.77.190.42"
+elasticsearch_fqdn = "elasticsearch.ru-central1.internal"
+kibana_fqdn = "kibana.ru-central1.internal"
+kibana_public_ip = "111.88.254.54"
+load_balancer_ip = "81.26.179.68"
+web_fqdns = {
+  "ru-central1-a" = "web-rucentral1a.ru-central1.internal"
+  "ru-central1-b" = "web-rucentral1b.ru-central1.internal"
+}
+web_ips = {
+  "ru-central1-a" = "10.10.0.28"
+  "ru-central1-b" = "10.11.0.6"
+}
+zabbix_fqdn = "zabbix.ru-central1.internal"
+zabbix_public_ip = "111.88.240.234"
+```
+
+
 # Структура моего проекта:
 
 ```bash
@@ -1200,7 +1223,7 @@ load_balancer_ip = "81.26.179.68"
 
 ## Проверка логов
 
-Веб-интерфейс Kibana доступен по адресу: http://111.88.250.37:5601/
+Веб-интерфейс Kibana доступен по адресу: http://111.88.254.54:5601/
 
 ![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/kibana.png)
 
@@ -1232,7 +1255,7 @@ resource "yandex_compute_snapshot_schedule" "daily_backup" {
 
 ![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/snap.png)
 
-
+#Финал
 И сейчас отправляя на проверку, я меняю одну строчку в файлике terraform.tfvars  
 ```preemptible            =true ```
 
