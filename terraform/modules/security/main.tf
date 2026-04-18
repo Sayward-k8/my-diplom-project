@@ -112,7 +112,14 @@ resource "yandex_vpc_security_group" "elasticsearch" {
     v4_cidr_blocks = [var.vpc_cidr]
     port           = 22
   }
-  
+
+    ingress {
+    protocol       = "TCP"
+    description    = "Zabbix agent from Zabbix server"
+    v4_cidr_blocks = ["10.0.0.0/24"]
+    port           = 10050
+  }
+
   egress {
     protocol       = "ANY"
     description    = "Allow all egress"
@@ -132,7 +139,15 @@ resource "yandex_vpc_security_group" "kibana" {
     v4_cidr_blocks = ["0.0.0.0/0"]
     port           = 5601
   }
-  
+
+  ingress {
+    protocol       = "TCP"
+    description    = "Zabbix agent from Zabbix server"
+    v4_cidr_blocks = ["10.0.0.0/24"]
+    port           = 10050
+  }
+
+
   ingress {
     protocol       = "TCP"
     description    = "SSH from bastion"
