@@ -1,0 +1,69 @@
+- name: Install Filebeat via Docker
+  hosts: web_servers
+  become: yes
+
+  tasks:
+    - name: Stop unattended-upgrades temporarily
+      systemd:
+        name: unattended-upgrades
+        state: stopped
+      changed_when: false
+      failed_when: false
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start unattended-upgrades back
+      systemd:
+        name: unattended-upgrades
+        state: started
+      changed_when: false
+      failed_when: false
+
+    - name: Create Filebeat config directory
+      file:
+        path: /etc/filebeat
+        state: directory
+        mode: '0755'
+
+    - name: Create Filebeat config
+      copy:
+        dest: /etc/filebeat/filebeat.yml
+        content: |
+          filebeat.inputs:
+          - type: log
+            enabled: true
+            paths:
+              - /var/log/nginx/diplom-access.log
+            fields:
+              log_type: nginx_access
+              server: {{ ansible_hostname }}
+
+          output.elasticsearch:
+            hosts: ["http://elasticsearch.ru-central1.internal:9200"]
+
+          setup.kibana:
+            host: "http://kibana.ru-central1.internal:5601"
+
+          logging.level: info
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Remove old Filebeat container
+      docker_container:
+        name: filebeat
+        state: absent
+      ignore_errors: yes
+
+    - name: Run Filebeat container
+      docker_container:
+        name: filebeat
+        image: docker.elastic.co/beats/filebeat:7.17.23
+        restart_policy: always
+        network_mode: host
+        volumes:
+          - "/etc/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro"
+          - "/var/log/nginx:/var/log/nginx:ro"

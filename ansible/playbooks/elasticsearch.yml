@@ -1,0 +1,55 @@
+- name: Install Elasticsearch via Docker
+  hosts: logging
+  become: yes
+
+  tasks:
+    - name: Stop unattended-upgrades temporarily
+      systemd:
+        name: unattended-upgrades
+        state: stopped
+      changed_when: false
+      failed_when: false
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        update_cache: yes
+        state: present
+
+    - name: Start Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Start unattended-upgrades back
+      systemd:
+        name: unattended-upgrades
+        state: started
+      changed_when: false
+      failed_when: false
+
+    - name: Run Elasticsearch container
+      docker_container:
+        name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.23
+        restart_policy: always
+        network_mode: host
+        env:
+          discovery.type: "single-node"
+          xpack.security.enabled: "false"
+          network.host: "0.0.0.0"
+          ES_JAVA_OPTS: "-Xms256m -Xmx256m"
+        ulimits:
+          - "memlock:-1:-1"
+          - "nofile:65536:65536"
+
+    - name: Wait for Elasticsearch
+      uri:
+        url: http://localhost:9200/_cluster/health
+        status_code: 200
+        timeout: 60
+      register: result
+      until: result.status == 200
+      retries: 30
+      delay: 5

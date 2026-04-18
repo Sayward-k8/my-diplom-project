@@ -1,0 +1,43 @@
+- name: Install Kibana via Docker
+  hosts: logging
+  become: yes
+
+  tasks:
+    - name: Stop unattended-upgrades temporarily
+      systemd:
+        name: unattended-upgrades
+        state: stopped
+      changed_when: false
+      failed_when: false
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start unattended-upgrades back
+      systemd:
+        name: unattended-upgrades
+        state: started
+      changed_when: false
+      failed_when: false
+
+    - name: Run Kibana container
+      docker_container:
+        name: kibana
+        image: docker.elastic.co/kibana/kibana:7.17.23
+        restart_policy: always
+        network_mode: host
+        env:
+          SERVER_HOST: "0.0.0.0"
+          ELASTICSEARCH_HOSTS: "http://localhost:9200"
+
+    - name: Wait for Kibana
+      uri:
+        url: http://localhost:5601/api/status
+        status_code: 200
+        timeout: 120
+      register: result
+      until: result.status == 200
+      retries: 30
+      delay: 10

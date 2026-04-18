@@ -1,0 +1,128 @@
+- name: Install Zabbix via Docker
+  hosts: monitoring
+  become: yes
+  vars:
+    zabbix_db_password: "pass_123"
+
+  tasks:
+    - name: Stop unattended-upgrades temporarily
+      systemd:
+        name: unattended-upgrades
+        state: stopped
+      changed_when: false
+      failed_when: false
+
+    - name: Install Docker and Docker Compose
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+        update_cache: yes
+        state: present
+
+    - name: Start Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Start unattended-upgrades back
+      systemd:
+        name: unattended-upgrades
+        state: started
+      changed_when: false
+      failed_when: false
+
+    - name: Create docker-compose directory
+      file:
+        path: /opt/zabbix-docker
+        state: directory
+        mode: '0755'
+
+    - name: Deploy docker-compose.yml with healthcheck
+      copy:
+        dest: /opt/zabbix-docker/docker-compose.yml
+        content: |
+          version: '3.8'
+          services:
+            zabbix-db:
+              image: postgres:15
+              environment:
+                POSTGRES_USER: zabbix
+                POSTGRES_PASSWORD: {{ zabbix_db_password }}
+                POSTGRES_DB: zabbix
+              volumes:
+                - zabbix-db-data:/var/lib/postgresql/data
+              restart: always
+              healthcheck:
+                test: ["CMD-SHELL", "pg_isready -U zabbix"]
+                interval: 10s
+                timeout: 5s
+                retries: 5
+
+            zabbix-server:
+              image: zabbix/zabbix-server-pgsql:alpine-7.0-latest
+              environment:
+                DB_SERVER_HOST: zabbix-db
+                POSTGRES_USER: zabbix
+                POSTGRES_PASSWORD: {{ zabbix_db_password }}
+                POSTGRES_DB: zabbix
+              ports:
+                - "10051:10051"
+              depends_on:
+                zabbix-db:
+                  condition: service_healthy
+              restart: always
+
+            zabbix-web:
+              image: zabbix/zabbix-web-nginx-pgsql:alpine-7.0-latest
+              environment:
+                DB_SERVER_HOST: zabbix-db
+                POSTGRES_USER: zabbix
+                POSTGRES_PASSWORD: {{ zabbix_db_password }}
+                POSTGRES_DB: zabbix
+                ZBX_SERVER_HOST: zabbix-server
+                PHP_TZ: Europe/Moscow
+              ports:
+                - "80:8080"
+              depends_on:
+                zabbix-db:
+                  condition: service_healthy
+                zabbix-server:
+                  condition: service_started
+              restart: always
+
+          volumes:
+            zabbix-db-data:
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Start Zabbix containers
+      docker_compose:
+        project_src: /opt/zabbix-docker
+        state: present
+        restarted: yes
+
+    - name: Wait for Zabbix server to be ready
+      uri:
+        url: http://localhost/api_jsonrpc.php
+        method: POST
+        body: '{"jsonrpc":"2.0","method":"apiinfo.version","id":1,"auth":null}'
+        body_format: json
+        status_code: 200
+        timeout: 120
+      register: result
+      until: result.status == 200
+      retries: 30
+      delay: 10
+
+    - name: Wait for Zabbix web
+      uri:
+        url: http://localhost/
+        status_code: 200
+        timeout: 120
+      register: web_result
+      until: web_result.status == 200
+      retries: 30
+      delay: 10

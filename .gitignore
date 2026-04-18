@@ -1,0 +1,25 @@
+# Terraform
+terraform/.terraform/
+terraform/terraform.tfstate*
+terraform/key.json
+terraform/terraform.tfvars
+.terraform.lock.hcl
+
+# Ansible
+ansible/inventory/hosts.yml
+
+# SSH
+id_rsa
+id_rsa.pub
+
+# Img
+*.jpg
+*.png
+
+# Logs
+*.log
+
+# Backups
+*.backup
+*.bak
+

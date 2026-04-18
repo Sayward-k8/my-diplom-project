@@ -1,0 +1,58 @@
+- name: Configure Zabbix agent on all servers
+  hosts: all_servers
+  become: yes
+
+  tasks:
+    - name: Stop unattended-upgrades temporarily
+      systemd:
+        name: unattended-upgrades
+        state: stopped
+      changed_when: false
+      failed_when: false
+
+    - name: Install Zabbix repository
+      shell: |
+        wget -q https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_7.0-2+ubuntu24.04_all.deb
+        dpkg -i zabbix-release_7.0-2+ubuntu24.04_all.deb
+        rm -f zabbix-release_7.0-2+ubuntu24.04_all.deb
+      args:
+        creates: /etc/apt/sources.list.d/zabbix.list
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Zabbix agent
+      apt:
+        name: zabbix-agent
+        state: present
+
+    - name: Start unattended-upgrades back
+      systemd:
+        name: unattended-upgrades
+        state: started
+      changed_when: false
+      failed_when: false
+
+    - name: Configure Zabbix agent
+      lineinfile:
+        path: /etc/zabbix/zabbix_agentd.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - { regexp: '^Server=', line: 'Server={{ zabbix_server_host }}' }
+        - { regexp: '^ServerActive=', line: 'ServerActive={{ zabbix_server_host }}' }
+        - { regexp: '^Hostname=', line: 'Hostname={{ ansible_hostname }}' }
+      notify: restart zabbix-agent
+
+    - name: Start Zabbix agent
+      service:
+        name: zabbix-agent
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: restart zabbix-agent
+      service:
+        name: zabbix-agent
+        state: restarted

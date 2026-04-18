@@ -1,0 +1,115 @@
+- name: Configure Nginx web servers
+  hosts: web_servers
+  become: yes
+
+  tasks:
+    - name: Stop unattended-upgrades
+      systemd:
+        name: unattended-upgrades
+        state: stopped
+      changed_when: false
+      failed_when: false
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Start unattended-upgrades
+      systemd:
+        name: unattended-upgrades
+        state: started
+      changed_when: false
+      failed_when: false
+
+    - name: Create website directory
+      file:
+        path: /var/www/diplom
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Deploy website content
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Diplom Project</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
+              .container { max-width: 800px; margin: 0 auto; }
+              .server { color: #0066cc; margin-top: 20px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>Welcome to Diplom Project</h1>
+              <p>This is a highly available web application</p>
+              <div class="server">
+                <p>Served by: <strong>{{ ansible_hostname }}</strong></p>
+                <p>Zone: <strong>{{ ansible_hostname.split('-')[1] | replace('rucentral', '') }}</strong></p>
+              </div>
+            </div>
+          </body>
+          </html>
+        dest: /var/www/diplom/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+
+    - name: Configure nginx site
+      copy:
+        dest: /etc/nginx/sites-available/diplom
+        content: |
+          server {
+              listen 80;
+              server_name _;
+              root /var/www/diplom;
+              index index.html;
+
+              access_log /var/log/nginx/diplom-access.log;
+              error_log /var/log/nginx/diplom-error.log;
+
+              location / {
+                  try_files $uri $uri/ =404;
+              }
+          }
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart nginx
+
+    - name: Enable site
+      file:
+        src: /etc/nginx/sites-available/diplom
+        dest: /etc/nginx/sites-enabled/diplom
+        state: link
+      notify: restart nginx
+
+    - name: Remove default site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: restart nginx
+
+    - name: Ensure nginx is running
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+        daemon_reload: yes
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+        daemon_reload: yes
