@@ -84,6 +84,7 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 Структура моего проекта:
 
+```bash
 vigonin@k8s-worker1:~/Diplom$ tree
 .
 ├── ansible
@@ -125,4 +126,31 @@ vigonin@k8s-worker1:~/Diplom$ tree
 │   ├── terraform.tfvars
 │   └── variables.tf
 └── terraform.tfstate
+```
+
+
+
+Запускаем скрипт [deploy.sh](https://github.com/Sayward-k8/my-diplom-project/blob/main/deploy.sh)
+
+![alt text](скрин terraform plana сюда)
+![alt text](скрин terraform plana сюда часть 2)
+
+После создания ресурсов на YC через терраформ, выполняется скрипт [ter-ans.sh](https://github.com/Sayward-k8/my-diplom-project/blob/main/ter-ans.sh), который формируется файл hosts.yml для ansible
+
+![alt text](скрин хост ямл)
+
+выполнение всех плейбуков ansible [плейбуки Elastic Stack, Nginx и Zabbix](https://github.com/Sayward-k8/my-diplom-project/tree/main/ansible/playbooks)
+
+![alt text](скрины выполнения плейбуков ansible )
+
+Проверка работоспособности сайта через балансировщик
+
+![alt text](скрин сайта)
+
+
+
+
+
+
+
 
