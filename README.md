@@ -82,7 +82,7 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 Так как в ходе выполнения задания приходилось многократно удалять и заново деплоить все ресурсы на YC, я хотел, чтобы всё максимально было автоматизировано
 
-Структура моего проекта:
+# Структура моего проекта:
 
 ```bash
 vigonin@k8s-worker1:~/Diplom$ tree
@@ -128,29 +128,140 @@ vigonin@k8s-worker1:~/Diplom$ tree
 └── terraform.tfstate
 ```
 
+# Terraform
+## Структура Terraform
 
+Основной конфиг
 
+[main.tf](https://github.com/Sayward-k8/my-diplom-project/blob/main/terraform/main.tf)
+
+Переменные подставляются из terraform.tfvars
+
+![alt text](скрины terraform.tfvars) 
+
+а результаты сохраняются в terraform.tfstate(они оба в .gitignore)
+
+![alt text](скрины terraform.tfstate)
+
+```bash
+├── terraform
+│   ├── main.tf
+│   ├── modules
+│   │   ├── instance
+│   │   │   ├── main.tf
+│   │   │   ├── outputs.tf
+│   │   │   ├── variables.tf
+│   │   │   └── versions.tf
+│   │   ├── security
+│   │   │   ├── main.tf
+│   │   │   ├── outputs.tf
+│   │   │   ├── variables.tf
+│   │   │   └── versions.tf
+│   │   └── vpc
+│   │       ├── main.tf
+│   │       ├── outputs.tf
+│   │       ├── variables.tf
+│   │       └── versions.tf
+│   ├── outputs.tf
+│   ├── terraform.tfstate
+│   ├── terraform.tfvars
+│   └── variables.tf
+```
+
+Основное преимущество модулей, что модуль можно переиспользовать подставляя другие параметры
+
+## instance  [instance](https://github.com/Sayward-k8/my-diplom-project/tree/main/terraform/modules/instance)
+## security  [security](https://github.com/Sayward-k8/my-diplom-project/tree/main/terraform/modules/security)
+## vpc [vpc](https://github.com/Sayward-k8/my-diplom-project/tree/main/terraform/modules/vpc)
+
+## Выполнение 
 Запускаем скрипт [deploy.sh](https://github.com/Sayward-k8/my-diplom-project/blob/main/deploy.sh)
 
 ![alt text](скрин terraform plana сюда)
 ![alt text](скрин terraform plana сюда часть 2)
 
-После создания ресурсов на YC через терраформ, выполняется скрипт [ter-ans.sh](https://github.com/Sayward-k8/my-diplom-project/blob/main/ter-ans.sh), который формируется файл hosts.yml для ansible
+# Ansible
+```bash
+├── ansible
+│   ├── inventory
+│   │   └── hosts.yml
+│   └── playbooks
+│       ├── elasticsearch.yml
+│       ├── filebeat.yml
+│       ├── kibana.yml
+│       ├── nginx.yml
+│       ├── zabbix-agent.yml
+│       └── zabbix.yml
+```
 
+После создания ресурсов на YC через терраформ, выполняется скрипт [ter-ans.sh](https://github.com/Sayward-k8/my-diplom-project/blob/main/ter-ans.sh), который формируется файл hosts.yml для ansible,
 ![alt text](скрин хост ямл)
 
-выполнение всех плейбуков ansible [плейбуки Elastic Stack, Nginx и Zabbix](https://github.com/Sayward-k8/my-diplom-project/tree/main/ansible/playbooks)
+а затем происходит выполнение всех плейбуков ansible 
+
+*Немного о плейбуках:*
+
+~~Изначально, я планировал устанавливать все сервисы традиционным способом через DEB-пакеты, тк официальный репозиторий Elastic был недоступен (ошибка 403 Forbidden), в процессе возник ряд проблем: для версии 9.3 требовалось значительно больше оперативной памяти, чем для 7.17...проблема с блокировкой dpkg, из-за чего плейбуки падали с ошибкой и еще какие то неприятные мелочи и...~~
+**В итоге я принял решение использовать Docker**
+
+[плейбуки Elastic Stack, Nginx и Zabbix](https://github.com/Sayward-k8/my-diplom-project/tree/main/ansible/playbooks)
 
 ![alt text](скрины выполнения плейбуков ansible )
 
-Проверка работоспособности сайта через балансировщик
+# Проверка работоспособности сайта через балансировщик
+
+![alt text](скрин сайта)
+
+# Проверка мониторинга Zabbix
+
+Доступность Zabbix
+
+![alt text](скрин сайта)
+
+## Хосты в Zabbix
+
+![alt text](скрин сайта)
+
+## Dashboard с метриками
 
 ![alt text](скрин сайта)
 
 
+## Проверка логов
 
+Веб-интерфейс Kibana доступен по адресу:
 
+![alt text](скрин сайта)
 
+Для просмотра логов nginx был создан index pattern `filebeat-*`
 
+![alt text](скрин сайта)
 
+В разделе **Discover** отображаются логи nginx:
 
+- `access.log` — все HTTP запросы к веб-серверам
+- `error.log` — ошибки nginx
+
+![alt text](скрин сайта)
+
+# Резервное копирование (Snapshots) 
+```hcl 
+resource "yandex_compute_snapshot_schedule" "daily_backup" {
+  name = "daily-backup-schedule"
+
+  schedule_policy {
+    expression = "0 2 * * *"
+  }
+
+  snapshot_count = 7
+
+  disk_ids = [
+    module.bastion.disk_id,
+    module.web["ru-central1-a"].disk_id,
+    module.web["ru-central1-b"].disk_id,
+    module.zabbix.disk_id,
+    module.elasticsearch.disk_id,
+    module.kibana.disk_id
+  ]
+}
+```
