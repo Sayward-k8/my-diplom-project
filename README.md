@@ -137,11 +137,11 @@ vigonin@k8s-worker1:~/Diplom$ tree
 
 Переменные подставляются из terraform.tfvars
 
-![alt text](скрины terraform.tfvars) 
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/terraform.tfvars.png)
 
 а результаты сохраняются в terraform.tfstate(они оба в .gitignore)
 
-![alt text](скрины terraform.tfstate)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/terraform.tfstate.png) 
 
 ```bash
 ├── terraform
@@ -177,8 +177,8 @@ vigonin@k8s-worker1:~/Diplom$ tree
 ## Выполнение 
 Запускаем скрипт [deploy.sh](https://github.com/Sayward-k8/my-diplom-project/blob/main/deploy.sh)
 
-![alt text](скрин terraform plana сюда)
-![alt text](скрин terraform plana сюда часть 2)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/terraform-plan.png)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/terraform-plan2.png)
 
 # Ansible
 ```bash
@@ -195,7 +195,8 @@ vigonin@k8s-worker1:~/Diplom$ tree
 ```
 
 После создания ресурсов на YC через терраформ, выполняется скрипт [ter-ans.sh](https://github.com/Sayward-k8/my-diplom-project/blob/main/ter-ans.sh), который формируется файл hosts.yml для ansible,
-![alt text](скрин хост ямл)
+
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/hosts.yml.png)
 
 а затем происходит выполнение всех плейбуков ansible 
 
