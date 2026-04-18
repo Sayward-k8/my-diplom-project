@@ -1136,6 +1136,12 @@ Terraform will perform the following actions:
 ```
 </details>
 
+## Инфрастуктура на YC
+
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/VM.png)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/vpc.png)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/sg.png)
+
 # Ansible
 ```bash
 ├── ansible
@@ -1224,3 +1230,5 @@ resource "yandex_compute_snapshot_schedule" "daily_backup" {
   ]
 }
 ```
+
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/snap.png)
