@@ -27,7 +27,9 @@ resource "yandex_compute_instance" "this" {
   hostname    = var.hostname
   platform_id = var.platform_id
   zone        = var.zone
-  
+
+  allow_stopping_for_update = true
+
   resources {
     cores         = var.resources.cores
     memory        = var.resources.memory
