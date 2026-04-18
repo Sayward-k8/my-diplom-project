@@ -177,8 +177,964 @@ vigonin@k8s-worker1:~/Diplom$ tree
 ## Выполнение 
 Запускаем скрипт [deploy.sh](https://github.com/Sayward-k8/my-diplom-project/blob/main/deploy.sh)
 
-![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/terraform-plan.png)
-![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/terraform-plan2.png)
+## Terraform plan 
+
+<details>
+
+```bash
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # yandex_alb_backend_group.web will be created
+  + resource "yandex_alb_backend_group" "web" {
+      + created_at = (known after apply)
+      + folder_id  = (known after apply)
+      + id         = (known after apply)
+      + name       = "web-backend-group"
+
+      + http_backend {
+          + name             = "web-backend"
+          + port             = 80
+          + target_group_ids = (known after apply)
+          + weight           = 1
+
+          + healthcheck {
+              + healthy_threshold   = 1
+              + interval            = "1s"
+              + timeout             = "1s"
+              + unhealthy_threshold = 2
+
+              + http_healthcheck {
+                  + path = "/"
+                }
+            }
+
+          + load_balancing_config {
+              + mode            = "ROUND_ROBIN"
+              + panic_threshold = 50
+            }
+        }
+    }
+
+  # yandex_alb_http_router.web will be created
+  + resource "yandex_alb_http_router" "web" {
+      + created_at = (known after apply)
+      + folder_id  = (known after apply)
+      + id         = (known after apply)
+      + name       = "web-router"
+    }
+
+  # yandex_alb_load_balancer.web will be created
+  + resource "yandex_alb_load_balancer" "web" {
+      + created_at   = (known after apply)
+      + folder_id    = (known after apply)
+      + id           = (known after apply)
+      + log_group_id = (known after apply)
+      + name         = "web-load-balancer"
+      + network_id   = (known after apply)
+      + status       = (known after apply)
+
+      + allocation_policy {
+          + location {
+              + disable_traffic = false
+              + subnet_id       = (known after apply)
+              + zone_id         = "ru-central1-a"
+            }
+        }
+
+      + listener {
+          + name = "http-listener"
+
+          + endpoint {
+              + ports = [
+                  + 80,
+                ]
+
+              + address {
+                  + external_ipv4_address {
+                      + address = (known after apply)
+                    }
+                }
+            }
+
+          + http {
+              + handler {
+                  + allow_http10       = false
+                  + http_router_id     = (known after apply)
+                  + rewrite_request_id = false
+                }
+            }
+        }
+    }
+
+  # yandex_alb_target_group.web will be created
+  + resource "yandex_alb_target_group" "web" {
+      + created_at = (known after apply)
+      + folder_id  = (known after apply)
+      + id         = (known after apply)
+      + name       = "web-target-group"
+
+      + target {
+          + ip_address = (known after apply)
+          + subnet_id  = (known after apply)
+        }
+      + target {
+          + ip_address = (known after apply)
+          + subnet_id  = (known after apply)
+        }
+    }
+
+  # yandex_alb_virtual_host.web will be created
+  + resource "yandex_alb_virtual_host" "web" {
+      + http_router_id = (known after apply)
+      + id             = (known after apply)
+      + name           = "web-host"
+
+      + route {
+          + name = "default-route"
+
+          + http_route {
+              + http_route_action {
+                  + backend_group_id = (known after apply)
+                  + timeout          = "2s"
+                }
+            }
+        }
+    }
+
+  # yandex_compute_snapshot_schedule.daily_backup will be created
+  + resource "yandex_compute_snapshot_schedule" "daily_backup" {
+      + created_at     = (known after apply)
+      + disk_ids       = (known after apply)
+      + folder_id      = (known after apply)
+      + id             = (known after apply)
+      + name           = "daily-backup-schedule"
+      + snapshot_count = 7
+      + status         = (known after apply)
+
+      + schedule_policy {
+          + expression = "0 2 * * *"
+          + start_at   = (known after apply)
+        }
+
+      + snapshot_spec (known after apply)
+    }
+
+  # module.bastion.yandex_compute_instance.this will be created
+  + resource "yandex_compute_instance" "this" {
+      + created_at                = (known after apply)
+      + folder_id                 = (known after apply)
+      + fqdn                      = (known after apply)
+      + gpu_cluster_id            = (known after apply)
+      + hardware_generation       = (known after apply)
+      + hostname                  = "bastion"
+      + id                        = (known after apply)
+      + maintenance_grace_period  = (known after apply)
+      + maintenance_policy        = (known after apply)
+      + metadata                  = {
+          + "user-data" = (sensitive value)
+        }
+      + name                      = "bastion"
+      + network_acceleration_type = "standard"
+      + platform_id               = "standard-v2"
+      + status                    = (known after apply)
+      + zone                      = "ru-central1-a"
+
+      + boot_disk {
+          + auto_delete = true
+          + device_name = (known after apply)
+          + disk_id     = (known after apply)
+          + mode        = (known after apply)
+
+          + initialize_params {
+              + block_size  = (known after apply)
+              + description = (known after apply)
+              + image_id    = "fd83ica41cade1mj35sr"
+              + name        = (known after apply)
+              + size        = 10
+              + snapshot_id = (known after apply)
+              + type        = "network-hdd"
+            }
+        }
+
+      + metadata_options (known after apply)
+
+      + network_interface {
+          + index              = (known after apply)
+          + ip_address         = (known after apply)
+          + ipv4               = true
+          + ipv6               = (known after apply)
+          + ipv6_address       = (known after apply)
+          + mac_address        = (known after apply)
+          + nat                = true
+          + nat_ip_address     = (known after apply)
+          + nat_ip_version     = (known after apply)
+          + security_group_ids = (known after apply)
+          + subnet_id          = (known after apply)
+        }
+
+      + placement_policy (known after apply)
+
+      + resources {
+          + core_fraction = 20
+          + cores         = 2
+          + memory        = 2
+        }
+
+      + scheduling_policy {
+          + preemptible = true
+        }
+    }
+
+  # module.elasticsearch.yandex_compute_instance.this will be created
+  + resource "yandex_compute_instance" "this" {
+      + created_at                = (known after apply)
+      + folder_id                 = (known after apply)
+      + fqdn                      = (known after apply)
+      + gpu_cluster_id            = (known after apply)
+      + hardware_generation       = (known after apply)
+      + hostname                  = "elasticsearch"
+      + id                        = (known after apply)
+      + maintenance_grace_period  = (known after apply)
+      + maintenance_policy        = (known after apply)
+      + metadata                  = {
+          + "user-data" = (sensitive value)
+        }
+      + name                      = "elasticsearch"
+      + network_acceleration_type = "standard"
+      + platform_id               = "standard-v2"
+      + status                    = (known after apply)
+      + zone                      = "ru-central1-a"
+
+      + boot_disk {
+          + auto_delete = true
+          + device_name = (known after apply)
+          + disk_id     = (known after apply)
+          + mode        = (known after apply)
+
+          + initialize_params {
+              + block_size  = (known after apply)
+              + description = (known after apply)
+              + image_id    = "fd83ica41cade1mj35sr"
+              + name        = (known after apply)
+              + size        = 10
+              + snapshot_id = (known after apply)
+              + type        = "network-hdd"
+            }
+        }
+
+      + metadata_options (known after apply)
+
+      + network_interface {
+          + index              = (known after apply)
+          + ip_address         = (known after apply)
+          + ipv4               = true
+          + ipv6               = (known after apply)
+          + ipv6_address       = (known after apply)
+          + mac_address        = (known after apply)
+          + nat                = false
+          + nat_ip_address     = (known after apply)
+          + nat_ip_version     = (known after apply)
+          + security_group_ids = (known after apply)
+          + subnet_id          = (known after apply)
+        }
+
+      + placement_policy (known after apply)
+
+      + resources {
+          + core_fraction = 20
+          + cores         = 2
+          + memory        = 2
+        }
+
+      + scheduling_policy {
+          + preemptible = true
+        }
+    }
+
+  # module.kibana.yandex_compute_instance.this will be created
+  + resource "yandex_compute_instance" "this" {
+      + created_at                = (known after apply)
+      + folder_id                 = (known after apply)
+      + fqdn                      = (known after apply)
+      + gpu_cluster_id            = (known after apply)
+      + hardware_generation       = (known after apply)
+      + hostname                  = "kibana"
+      + id                        = (known after apply)
+      + maintenance_grace_period  = (known after apply)
+      + maintenance_policy        = (known after apply)
+      + metadata                  = {
+          + "user-data" = (sensitive value)
+        }
+      + name                      = "kibana"
+      + network_acceleration_type = "standard"
+      + platform_id               = "standard-v2"
+      + status                    = (known after apply)
+      + zone                      = "ru-central1-a"
+
+      + boot_disk {
+          + auto_delete = true
+          + device_name = (known after apply)
+          + disk_id     = (known after apply)
+          + mode        = (known after apply)
+
+          + initialize_params {
+              + block_size  = (known after apply)
+              + description = (known after apply)
+              + image_id    = "fd83ica41cade1mj35sr"
+              + name        = (known after apply)
+              + size        = 10
+              + snapshot_id = (known after apply)
+              + type        = "network-hdd"
+            }
+        }
+
+      + metadata_options (known after apply)
+
+      + network_interface {
+          + index              = (known after apply)
+          + ip_address         = (known after apply)
+          + ipv4               = true
+          + ipv6               = (known after apply)
+          + ipv6_address       = (known after apply)
+          + mac_address        = (known after apply)
+          + nat                = true
+          + nat_ip_address     = (known after apply)
+          + nat_ip_version     = (known after apply)
+          + security_group_ids = (known after apply)
+          + subnet_id          = (known after apply)
+        }
+
+      + placement_policy (known after apply)
+
+      + resources {
+          + core_fraction = 20
+          + cores         = 2
+          + memory        = 2
+        }
+
+      + scheduling_policy {
+          + preemptible = true
+        }
+    }
+
+  # module.security.yandex_vpc_security_group.bastion will be created
+  + resource "yandex_vpc_security_group" "bastion" {
+      + created_at  = (known after apply)
+      + description = "Bastion host security group"
+      + folder_id   = (known after apply)
+      + id          = (known after apply)
+      + labels      = (known after apply)
+      + name        = "bastion-sg"
+      + network_id  = (known after apply)
+      + status      = (known after apply)
+
+      + egress {
+          + description       = "Allow all egress"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = -1
+          + protocol          = "ANY"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "0.0.0.0/0",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+
+      + ingress {
+          + description       = "SSH from internet"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = 22
+          + protocol          = "TCP"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "0.0.0.0/0",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+    }
+
+  # module.security.yandex_vpc_security_group.elasticsearch will be created
+  + resource "yandex_vpc_security_group" "elasticsearch" {
+      + created_at  = (known after apply)
+      + description = "Elasticsearch security group"
+      + folder_id   = (known after apply)
+      + id          = (known after apply)
+      + labels      = (known after apply)
+      + name        = "elastic-sg"
+      + network_id  = (known after apply)
+      + status      = (known after apply)
+
+      + egress {
+          + description       = "Allow all egress"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = -1
+          + protocol          = "ANY"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "0.0.0.0/0",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+
+      + ingress {
+          + description       = "Elasticsearch API"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = 9200
+          + protocol          = "TCP"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "10.0.0.0/16",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+      + ingress {
+          + description       = "SSH from bastion"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = 22
+          + protocol          = "TCP"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "10.0.0.0/16",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+    }
+
+  # module.security.yandex_vpc_security_group.kibana will be created
+  + resource "yandex_vpc_security_group" "kibana" {
+      + created_at  = (known after apply)
+      + description = "Kibana security group"
+      + folder_id   = (known after apply)
+      + id          = (known after apply)
+      + labels      = (known after apply)
+      + name        = "kibana-sg"
+      + network_id  = (known after apply)
+      + status      = (known after apply)
+
+      + egress {
+          + description       = "Allow all egress"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = -1
+          + protocol          = "ANY"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "0.0.0.0/0",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+
+      + ingress {
+          + description       = "Kibana web UI"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = 5601
+          + protocol          = "TCP"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "0.0.0.0/0",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+      + ingress {
+          + description       = "SSH from bastion"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = 22
+          + protocol          = "TCP"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "10.0.0.0/16",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+    }
+
+  # module.security.yandex_vpc_security_group.web will be created
+  + resource "yandex_vpc_security_group" "web" {
+      + created_at  = (known after apply)
+      + description = "Web servers security group"
+      + folder_id   = (known after apply)
+      + id          = (known after apply)
+      + labels      = (known after apply)
+      + name        = "web-sg"
+      + network_id  = (known after apply)
+      + status      = (known after apply)
+
+      + egress {
+          + description       = "Allow all egress"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = -1
+          + protocol          = "ANY"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "0.0.0.0/0",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+
+      + ingress {
+          + description       = "HTTP from load balancer"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = 80
+          + protocol          = "TCP"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "10.0.0.0/16",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+      + ingress {
+          + description       = "SSH from bastion"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = 22
+          + protocol          = "TCP"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "10.0.0.0/16",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+      + ingress {
+          + description       = "Zabbix agent"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = 10050
+          + protocol          = "TCP"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "10.0.0.0/16",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+    }
+
+  # module.security.yandex_vpc_security_group.zabbix will be created
+  + resource "yandex_vpc_security_group" "zabbix" {
+      + created_at  = (known after apply)
+      + description = "Zabbix server security group"
+      + folder_id   = (known after apply)
+      + id          = (known after apply)
+      + labels      = (known after apply)
+      + name        = "zabbix-sg"
+      + network_id  = (known after apply)
+      + status      = (known after apply)
+
+      + egress {
+          + description       = "Allow all egress"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = -1
+          + protocol          = "ANY"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "0.0.0.0/0",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+
+      + ingress {
+          + description       = "SSH from bastion"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = 22
+          + protocol          = "TCP"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "10.0.0.0/16",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+      + ingress {
+          + description       = "Zabbix server"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = 10051
+          + protocol          = "TCP"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "10.0.0.0/16",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+      + ingress {
+          + description       = "Zabbix web UI"
+          + from_port         = -1
+          + id                = (known after apply)
+          + labels            = (known after apply)
+          + port              = 80
+          + protocol          = "TCP"
+          + to_port           = -1
+          + v4_cidr_blocks    = [
+              + "0.0.0.0/0",
+            ]
+          + v6_cidr_blocks    = []
+            # (2 unchanged attributes hidden)
+        }
+    }
+
+  # module.security.yandex_vpc_security_group_rule.elasticsearch_from_web will be created
+  + resource "yandex_vpc_security_group_rule" "elasticsearch_from_web" {
+      + description            = "Allow Elasticsearch from web servers"
+      + direction              = "ingress"
+      + from_port              = -1
+      + id                     = (known after apply)
+      + labels                 = (known after apply)
+      + port                   = 9200
+      + predefined_target      = (known after apply)
+      + protocol               = "TCP"
+      + security_group_binding = (known after apply)
+      + security_group_id      = (known after apply)
+      + to_port                = -1
+      + v4_cidr_blocks         = [
+          + "10.10.0.0/24",
+          + "10.11.0.0/24",
+        ]
+      + v6_cidr_blocks         = (known after apply)
+    }
+
+  # module.vpc.yandex_vpc_gateway.nat will be created
+  + resource "yandex_vpc_gateway" "nat" {
+      + created_at = (known after apply)
+      + folder_id  = (known after apply)
+      + id         = (known after apply)
+      + labels     = (known after apply)
+      + name       = "nat-gateway"
+
+      + shared_egress_gateway {}
+    }
+
+  # module.vpc.yandex_vpc_network.main will be created
+  + resource "yandex_vpc_network" "main" {
+      + created_at                = (known after apply)
+      + default_security_group_id = (known after apply)
+      + description               = "Main VPC for diplom infrastructure"
+      + folder_id                 = (known after apply)
+      + id                        = (known after apply)
+      + labels                    = (known after apply)
+      + name                      = "diplom-vpc"
+      + subnet_ids                = (known after apply)
+    }
+
+  # module.vpc.yandex_vpc_route_table.nat will be created
+  + resource "yandex_vpc_route_table" "nat" {
+      + created_at = (known after apply)
+      + folder_id  = (known after apply)
+      + id         = (known after apply)
+      + labels     = (known after apply)
+      + name       = "nat-route"
+      + network_id = (known after apply)
+
+      + static_route {
+          + destination_prefix = "0.0.0.0/0"
+          + gateway_id         = (known after apply)
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # module.vpc.yandex_vpc_subnet.private["ru-central1-a"] will be created
+  + resource "yandex_vpc_subnet" "private" {
+      + created_at     = (known after apply)
+      + folder_id      = (known after apply)
+      + id             = (known after apply)
+      + labels         = (known after apply)
+      + name           = "private-ru-central1-a"
+      + network_id     = (known after apply)
+      + route_table_id = (known after apply)
+      + v4_cidr_blocks = [
+          + "10.10.0.0/24",
+        ]
+      + v6_cidr_blocks = (known after apply)
+      + zone           = "ru-central1-a"
+    }
+
+  # module.vpc.yandex_vpc_subnet.private["ru-central1-b"] will be created
+  + resource "yandex_vpc_subnet" "private" {
+      + created_at     = (known after apply)
+      + folder_id      = (known after apply)
+      + id             = (known after apply)
+      + labels         = (known after apply)
+      + name           = "private-ru-central1-b"
+      + network_id     = (known after apply)
+      + route_table_id = (known after apply)
+      + v4_cidr_blocks = [
+          + "10.11.0.0/24",
+        ]
+      + v6_cidr_blocks = (known after apply)
+      + zone           = "ru-central1-b"
+    }
+
+  # module.vpc.yandex_vpc_subnet.public["ru-central1-a"] will be created
+  + resource "yandex_vpc_subnet" "public" {
+      + created_at     = (known after apply)
+      + folder_id      = (known after apply)
+      + id             = (known after apply)
+      + labels         = (known after apply)
+      + name           = "public-ru-central1-a"
+      + network_id     = (known after apply)
+      + v4_cidr_blocks = [
+          + "10.0.0.0/24",
+        ]
+      + v6_cidr_blocks = (known after apply)
+      + zone           = "ru-central1-a"
+    }
+
+  # module.vpc.yandex_vpc_subnet.public["ru-central1-b"] will be created
+  + resource "yandex_vpc_subnet" "public" {
+      + created_at     = (known after apply)
+      + folder_id      = (known after apply)
+      + id             = (known after apply)
+      + labels         = (known after apply)
+      + name           = "public-ru-central1-b"
+      + network_id     = (known after apply)
+      + v4_cidr_blocks = [
+          + "10.1.0.0/24",
+        ]
+      + v6_cidr_blocks = (known after apply)
+      + zone           = "ru-central1-b"
+    }
+
+  # module.web["ru-central1-a"].yandex_compute_instance.this will be created
+  + resource "yandex_compute_instance" "this" {
+      + created_at                = (known after apply)
+      + folder_id                 = (known after apply)
+      + fqdn                      = (known after apply)
+      + gpu_cluster_id            = (known after apply)
+      + hardware_generation       = (known after apply)
+      + hostname                  = "web-rucentral1a"
+      + id                        = (known after apply)
+      + maintenance_grace_period  = (known after apply)
+      + maintenance_policy        = (known after apply)
+      + metadata                  = {
+          + "user-data" = (sensitive value)
+        }
+      + name                      = "web-rucentral1a"
+      + network_acceleration_type = "standard"
+      + platform_id               = "standard-v2"
+      + status                    = (known after apply)
+      + zone                      = "ru-central1-a"
+
+      + boot_disk {
+          + auto_delete = true
+          + device_name = (known after apply)
+          + disk_id     = (known after apply)
+          + mode        = (known after apply)
+
+          + initialize_params {
+              + block_size  = (known after apply)
+              + description = (known after apply)
+              + image_id    = "fd83ica41cade1mj35sr"
+              + name        = (known after apply)
+              + size        = 10
+              + snapshot_id = (known after apply)
+              + type        = "network-hdd"
+            }
+        }
+
+      + metadata_options (known after apply)
+
+      + network_interface {
+          + index              = (known after apply)
+          + ip_address         = (known after apply)
+          + ipv4               = true
+          + ipv6               = (known after apply)
+          + ipv6_address       = (known after apply)
+          + mac_address        = (known after apply)
+          + nat                = false
+          + nat_ip_address     = (known after apply)
+          + nat_ip_version     = (known after apply)
+          + security_group_ids = (known after apply)
+          + subnet_id          = (known after apply)
+        }
+
+      + placement_policy (known after apply)
+
+      + resources {
+          + core_fraction = 20
+          + cores         = 2
+          + memory        = 2
+        }
+
+      + scheduling_policy {
+          + preemptible = true
+        }
+    }
+
+  # module.web["ru-central1-b"].yandex_compute_instance.this will be created
+  + resource "yandex_compute_instance" "this" {
+      + created_at                = (known after apply)
+      + folder_id                 = (known after apply)
+      + fqdn                      = (known after apply)
+      + gpu_cluster_id            = (known after apply)
+      + hardware_generation       = (known after apply)
+      + hostname                  = "web-rucentral1b"
+      + id                        = (known after apply)
+      + maintenance_grace_period  = (known after apply)
+      + maintenance_policy        = (known after apply)
+      + metadata                  = {
+          + "user-data" = (sensitive value)
+        }
+      + name                      = "web-rucentral1b"
+      + network_acceleration_type = "standard"
+      + platform_id               = "standard-v2"
+      + status                    = (known after apply)
+      + zone                      = "ru-central1-b"
+
+      + boot_disk {
+          + auto_delete = true
+          + device_name = (known after apply)
+          + disk_id     = (known after apply)
+          + mode        = (known after apply)
+
+          + initialize_params {
+              + block_size  = (known after apply)
+              + description = (known after apply)
+              + image_id    = "fd83ica41cade1mj35sr"
+              + name        = (known after apply)
+              + size        = 10
+              + snapshot_id = (known after apply)
+              + type        = "network-hdd"
+            }
+        }
+
+      + metadata_options (known after apply)
+
+      + network_interface {
+          + index              = (known after apply)
+          + ip_address         = (known after apply)
+          + ipv4               = true
+          + ipv6               = (known after apply)
+          + ipv6_address       = (known after apply)
+          + mac_address        = (known after apply)
+          + nat                = false
+          + nat_ip_address     = (known after apply)
+          + nat_ip_version     = (known after apply)
+          + security_group_ids = (known after apply)
+          + subnet_id          = (known after apply)
+        }
+
+      + placement_policy (known after apply)
+
+      + resources {
+          + core_fraction = 20
+          + cores         = 2
+          + memory        = 2
+        }
+
+      + scheduling_policy {
+          + preemptible = true
+        }
+    }
+
+  # module.zabbix.yandex_compute_instance.this will be created
+  + resource "yandex_compute_instance" "this" {
+      + created_at                = (known after apply)
+      + folder_id                 = (known after apply)
+      + fqdn                      = (known after apply)
+      + gpu_cluster_id            = (known after apply)
+      + hardware_generation       = (known after apply)
+      + hostname                  = "zabbix"
+      + id                        = (known after apply)
+      + maintenance_grace_period  = (known after apply)
+      + maintenance_policy        = (known after apply)
+      + metadata                  = {
+          + "user-data" = (sensitive value)
+        }
+      + name                      = "zabbix"
+      + network_acceleration_type = "standard"
+      + platform_id               = "standard-v2"
+      + status                    = (known after apply)
+      + zone                      = "ru-central1-a"
+
+      + boot_disk {
+          + auto_delete = true
+          + device_name = (known after apply)
+          + disk_id     = (known after apply)
+          + mode        = (known after apply)
+
+          + initialize_params {
+              + block_size  = (known after apply)
+              + description = (known after apply)
+              + image_id    = "fd83ica41cade1mj35sr"
+              + name        = (known after apply)
+              + size        = 10
+              + snapshot_id = (known after apply)
+              + type        = "network-hdd"
+            }
+        }
+
+      + metadata_options (known after apply)
+
+      + network_interface {
+          + index              = (known after apply)
+          + ip_address         = (known after apply)
+          + ipv4               = true
+          + ipv6               = (known after apply)
+          + ipv6_address       = (known after apply)
+          + mac_address        = (known after apply)
+          + nat                = true
+          + nat_ip_address     = (known after apply)
+          + nat_ip_version     = (known after apply)
+          + security_group_ids = (known after apply)
+          + subnet_id          = (known after apply)
+        }
+
+      + placement_policy (known after apply)
+
+      + resources {
+          + core_fraction = 20
+          + cores         = 2
+          + memory        = 2
+        }
+
+      + scheduling_policy {
+          + preemptible = true
+        }
+    }
+```
+</details>
 
 # Ansible
 ```bash
@@ -194,11 +1150,10 @@ vigonin@k8s-worker1:~/Diplom$ tree
 │       └── zabbix.yml
 ```
 
-После создания ресурсов на YC через терраформ, выполняется скрипт [ter-ans.sh](https://github.com/Sayward-k8/my-diplom-project/blob/main/ter-ans.sh), который формируется файл hosts.yml для ansible,
+После создания ресурсов на YC через терраформ, выполняется скрипт [ter-ans.sh](https://github.com/Sayward-k8/my-diplom-project/blob/main/ter-ans.sh), который формируется файл hosts.yml для ansible, а затем происходит выполнение всех плейбуков ansible.
 
 ![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/hosts.yml.png)
 
-а затем происходит выполнение всех плейбуков ansible 
 
 *Немного о плейбуках:*
 
@@ -207,11 +1162,24 @@ vigonin@k8s-worker1:~/Diplom$ tree
 
 [плейбуки Elastic Stack, Nginx и Zabbix](https://github.com/Sayward-k8/my-diplom-project/tree/main/ansible/playbooks)
 
-![alt text](скрины выполнения плейбуков ansible )
+## Выполнение плейбуков
+
+<details>
+  
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/ansible/1.png)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/ansible/2.png)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/ansible/3.png)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/ansible/4.png)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/ansible/5.png)
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/ansible/6.png)
+
+</details>
 
 # Проверка работоспособности сайта через балансировщик
 
-![alt text](скрин сайта)
+load_balancer_ip = "81.26.179.68"
+
+![alt text](https://github.com/Sayward-k8/my-diplom-project/blob/main/img/load_balancer.png)
 
 # Проверка мониторинга Zabbix
 
