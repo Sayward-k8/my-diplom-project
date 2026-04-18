@@ -10,7 +10,14 @@ resource "yandex_vpc_security_group" "bastion" {
     v4_cidr_blocks = ["0.0.0.0/0"]
     port           = 22
   }
-  
+
+  ingress {
+    protocol       = "TCP"
+    description    = "Zabbix agent from Zabbix server"
+    v4_cidr_blocks = ["10.0.0.0/24"]
+    port           = 10050
+  }  
+
   egress {
     protocol       = "ANY"
     description    = "Allow all egress"
