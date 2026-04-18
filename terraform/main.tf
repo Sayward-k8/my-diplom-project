@@ -211,3 +211,19 @@ resource "yandex_alb_virtual_host" "web" {
     }
   }
 }
+
+resource "yandex_compute_snapshot_schedule" "daily_backup" {
+  name = "daily-backup-schedule"
+  schedule_policy {
+    expression = "0 2 * * *"  # каждый день в 2:00 UTC
+  }
+  snapshot_count = 7          # хранить 7 дней
+  disk_ids = [
+    module.bastion.disk_id,
+    module.web["ru-central1-a"].disk_id,
+    module.web["ru-central1-b"].disk_id,
+    module.zabbix.disk_id,
+    module.elasticsearch.disk_id,
+    module.kibana.disk_id
+  ]
+}
